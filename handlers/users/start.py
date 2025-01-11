@@ -40,43 +40,45 @@ async def start_adding_chat(message: types.Message):
 @dp.message_handler(IsAdmin(), state=AddChat.chat_id)
 async def add_chat(message: types.Message, state: FSMContext):
     chat_id = message.text
-
-    try:
-        if chat_id.isdigit():
-            chat_id = int(chat_id)
-        else:
-            raise ValueError("Chat ID noto'g'ri formatda!")
-        entity = await telethon_client.get_entity(chat_id)
-        if isinstance(entity, User):
-            entity_type = "Foydalanuvchi"
-            title = f"{entity.first_name or ''} {entity.last_name or ''}".strip()
-        elif isinstance(entity, Chat):
-            entity_type = "Oddiy guruh"
-            title = entity.title
-        elif isinstance(entity, Channel):
-            entity_type = "Kanal yoki superguruh"
-            title = entity.title
-        else:
-            entity_type = "Noma'lum tur"
-            title = "Noma'lum"
-
-        await message.answer(
-            f"Entity topildi!\n\n"
-            f"Turi: {entity_type}\n"
-            f"Nomi: {title}\n"
-            f"ID: {chat_id}"
-        )
-
-        await db.add_chat(chat_id=chat_id, type_chat=entity_type)
-
-        await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
-    except ValueError as ve:
-        await message.answer(f"Noto'g'ri ID: {ve}")
-    except Exception as e:
-        print(f"Xato yuz berdi: {e}")
-        await message.answer("Chat topilmadi yoki unga kirish imkoni yo'q.", reply_markup=main_menu)
-
+    await db.add_chat(chat_id=chat_id, type_chat="TEST")
+    await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
     await state.finish()
+    # try:
+    #     if chat_id.isdigit():
+    #         chat_id = int(chat_id)
+    #     else:
+    #         raise ValueError("Chat ID noto'g'ri formatda!")
+    #     entity = await telethon_client.get_entity(chat_id)
+    #     if isinstance(entity, User):
+    #         entity_type = "Foydalanuvchi"
+    #         title = f"{entity.first_name or ''} {entity.last_name or ''}".strip()
+    #     elif isinstance(entity, Chat):
+    #         entity_type = "Oddiy guruh"
+    #         title = entity.title
+    #     elif isinstance(entity, Channel):
+    #         entity_type = "Kanal yoki superguruh"
+    #         title = entity.title
+    #     else:
+    #         entity_type = "Noma'lum tur"
+    #         title = "Noma'lum"
+    #
+    #     await message.answer(
+    #         f"Entity topildi!\n\n"
+    #         f"Turi: {entity_type}\n"
+    #         f"Nomi: {title}\n"
+    #         f"ID: {chat_id}"
+    #     )
+    #
+    #     await db.add_chat(chat_id=chat_id, type_chat=entity_type)
+    #
+    #     await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
+    # except ValueError as ve:
+    #     await message.answer(f"Noto'g'ri ID: {ve}")
+    # except Exception as e:
+    #     print(f"Xato yuz berdi: {e}")
+    #     await message.answer("Chat topilmadi yoki unga kirish imkoni yo'q.", reply_markup=main_menu)
+    #
+    # await state.finish()
 
 
 @dp.message_handler(IsAdmin(), text="Reklama yuborish")
