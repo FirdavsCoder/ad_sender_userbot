@@ -40,7 +40,7 @@ async def start_adding_chat(message: types.Message):
 @dp.message_handler(IsAdmin(), state=AddChat.chat_id)
 async def add_chat(message: types.Message, state: FSMContext):
     chat_id = message.text
-    await db.add_chat(chat_id=chat_id, type_chat="TEST")
+    await db.add_chat(chat_id=int(chat_id), type_chat="TEST")
     await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
     await state.finish()
     # try:
