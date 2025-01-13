@@ -127,7 +127,7 @@ async def send_ad(message: types.Message, state: FSMContext):
                 caption = message.caption or ""
 
                 if message.text:
-                    await telethon_client.send_message(chat, message.text)
+                    await telethon_client.send_message(entity, message.text)
                 else:
                     for media_type, (ext, getter) in MEDIA_TYPES.items():
                         if getattr(message, media_type, None):
