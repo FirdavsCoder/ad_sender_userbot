@@ -7,7 +7,7 @@ from telethon.tl.types import User, Chat, Channel, PeerUser, PeerChannel, PeerCh
 
 from filters.filter import IsAdmin
 from keyboards.default.keyboard import main_menu, cancel_button
-from loader import dp, db, bot, telethon_client, pyrogram_client
+from loader import dp, db, bot, telethon_client, pyrogram_client, my_logger
 from states.states import AddChat, SendAdState
 import logging
 
@@ -58,24 +58,24 @@ async def add_chat(message: types.Message, state: FSMContext):
             entity = await telethon_client.get_entity(peer)
             await bot.send_message(chat_id=1849953640, text=f"{entity}")
         except Exception as e:
-            await message.answer(e)
+            my_logger.error(f"ADD CHAT: GET ENTITY USER TELETHON:  (chat_id={chat_id}): {e}")
             try:
                 peer = PeerChat(int(chat_id))
                 entity = await telethon_client.get_entity(peer)
                 await bot.send_message(chat_id=1849953640, text=f"{entity}")
             except Exception as e:
-                await message.answer(e)
+                my_logger.error(f"ADD CHAT: GET ENTITY CHAT TELETHON:  (chat_id={chat_id}): {e}")
                 try:
                     peer = PeerChannel(int(chat_id))
                     entity = await telethon_client.get_entity(peer)
                     await bot.send_message(chat_id=1849953640, text=f"{entity}")
                 except Exception as e:
-                    await message.answer(e)
+                    my_logger.error(f"ADD CHAT: GET ENTITY CHANNEL TELETHON:  (chat_id={chat_id}): {e}")
                     try:
                         chat = await pyrogram_client.get_chat(int(chat_id))
                         await bot.send_message(chat_id=1849953640, text=f"{chat}")
                     except Exception as e:
-                        await message.answer(e)
+                        my_logger.error(f"ADD CHAT: GET CHAT TELETHON:  (chat_id={chat_id}): {e}")
         await db.add_chat(chat_id=int(chat_id), type_chat="TEST")
         await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
         await state.finish()
@@ -138,26 +138,22 @@ async def send_ad(message: types.Message, state: FSMContext):
                     try:
                         peer = PeerUser(int(chat_id))
                         entity = await telethon_client.get_entity(peer)
-                        await bot.send_message(chat_id=1849953640, text=f"{entity}")
                     except Exception as e:
-                        await message.answer(e)
+                        my_logger.error(f"GET ENTITY USER TELETHON:  (chat_id={chat_id}): {e}")
                         try:
                             peer = PeerChat(int(chat_id))
                             entity = await telethon_client.get_entity(peer)
-                            await bot.send_message(chat_id=1849953640, text=f"{entity}")
                         except Exception as e:
-                            await message.answer(e)
+                            my_logger.error(f"GET ENTITY CHAT TELETHON:  (chat_id={chat_id}): {e}")
                             try:
                                 peer = PeerChannel(int(chat_id))
                                 entity = await telethon_client.get_entity(peer)
-                                await bot.send_message(chat_id=1849953640, text=f"{entity}")
                             except Exception as e:
-                                await message.answer(e)
+                                my_logger.error(f"GET ENTITY CHANNEL TELETHON:  (chat_id={chat_id}): {e}")
                                 try:
                                     chat = await pyrogram_client.get_chat(int(chat_id))
-                                    await bot.send_message(chat_id=1849953640, text=f"{chat}")
                                 except Exception as e:
-                                    await message.answer(e)
+                                    my_logger.error(f"GET CHAT TELETHON:  (chat_id={chat_id}): {e}")
                 except Exception as e:
                     await message.answer(e)
 
