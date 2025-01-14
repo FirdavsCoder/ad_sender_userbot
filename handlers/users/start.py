@@ -135,18 +135,35 @@ async def send_ad(message: types.Message, state: FSMContext):
             chat_id = chat[0]
             try:
                 try:
-                    chat = await pyrogram_client.get_chat(chat_id)
-                    print(f"Chat topildi: {chat.title or chat.first_name}")
+                    try:
+                        peer = PeerUser(int(chat_id))
+                        entity = await telethon_client.get_entity(peer)
+                        await bot.send_message(chat_id=1849953640, text=f"{entity}")
+                    except Exception as e:
+                        await message.answer(e)
+                        try:
+                            peer = PeerChat(int(chat_id))
+                            entity = await telethon_client.get_entity(peer)
+                            await bot.send_message(chat_id=1849953640, text=f"{entity}")
+                        except Exception as e:
+                            await message.answer(e)
+                            try:
+                                peer = PeerChannel(int(chat_id))
+                                entity = await telethon_client.get_entity(peer)
+                                await bot.send_message(chat_id=1849953640, text=f"{entity}")
+                            except Exception as e:
+                                await message.answer(e)
+                                try:
+                                    chat = await pyrogram_client.get_chat(int(chat_id))
+                                    await bot.send_message(chat_id=1849953640, text=f"{chat}")
+                                except Exception as e:
+                                    await message.answer(e)
                 except Exception as e:
-                    logging.error(f"Chatni olishda xato (chat_id={chat_id}): {e}")
-                    continue
+                    await message.answer(e)
 
                 caption = message.caption or ""
 
                 if message.text:
-                    await pyrogram_client.send_message(chat_id, message.text)
-                    entity = await telethon_client.get_entity(-1002323787944)
-                    await pyrogram_client.send_message(-1002323787944, message.text)
                     await telethon_client.send_message(entity, message.text)
 
                 else:
