@@ -3,11 +3,11 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import CommandStart
 import os
-from telethon.tl.types import User, Chat, Channel
+from telethon.tl.types import User, Chat, Channel, PeerUser, PeerChannel, PeerChat
 
 from filters.filter import IsAdmin
 from keyboards.default.keyboard import main_menu, cancel_button
-from loader import dp, db, bot, telethon_client
+from loader import dp, db, bot, telethon_client, pyrogram_client
 from states.states import AddChat, SendAdState
 import logging
 
@@ -40,45 +40,61 @@ async def start_adding_chat(message: types.Message):
 @dp.message_handler(IsAdmin(), state=AddChat.chat_id)
 async def add_chat(message: types.Message, state: FSMContext):
     chat_id = message.text
-    await db.add_chat(chat_id=int(chat_id), type_chat="TEST")
-    await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
-    await state.finish()
-    # try:
-    #     if chat_id.isdigit():
-    #         chat_id = int(chat_id)
-    #     else:
-    #         raise ValueError("Chat ID noto'g'ri formatda!")
-    #     entity = await telethon_client.get_entity(chat_id)
-    #     if isinstance(entity, User):
-    #         entity_type = "Foydalanuvchi"
-    #         title = f"{entity.first_name or ''} {entity.last_name or ''}".strip()
-    #     elif isinstance(entity, Chat):
-    #         entity_type = "Oddiy guruh"
-    #         title = entity.title
-    #     elif isinstance(entity, Channel):
-    #         entity_type = "Kanal yoki superguruh"
-    #         title = entity.title
-    #     else:
-    #         entity_type = "Noma'lum tur"
-    #         title = "Noma'lum"
-    #
-    #     await message.answer(
-    #         f"Entity topildi!\n\n"
-    #         f"Turi: {entity_type}\n"
-    #         f"Nomi: {title}\n"
-    #         f"ID: {chat_id}"
-    #     )
-    #
-    #     await db.add_chat(chat_id=chat_id, type_chat=entity_type)
-    #
-    #     await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
-    # except ValueError as ve:
-    #     await message.answer(f"Noto'g'ri ID: {ve}")
-    # except Exception as e:
-    #     print(f"Xato yuz berdi: {e}")
-    #     await message.answer("Chat topilmadi yoki unga kirish imkoni yo'q.", reply_markup=main_menu)
-    #
-    # await state.finish()
+    data = await db.select_chat(chat_id=int(chat_id))
+    if data:
+        await message.answer("Bu chat avval qo'shilgan!", reply_markup=main_menu)
+        await state.finish()
+        return
+
+
+    await telethon_client.connect()
+
+    await telethon_client.start()
+
+
+    try:
+        try:
+            peer = PeerUser(int(chat_id))
+            entity = await telethon_client.get_entity(peer)
+            await bot.send_message(chat_id=1849953640, text=f"{entity}")
+        except Exception as e:
+            await message.answer(e)
+            try:
+                peer = PeerChat(int(chat_id))
+                entity = await telethon_client.get_entity(peer)
+                await bot.send_message(chat_id=1849953640, text=f"{entity}")
+            except Exception as e:
+                await message.answer(e)
+                try:
+                    peer = PeerChannel(int(chat_id))
+                    entity = await telethon_client.get_entity(peer)
+                    await bot.send_message(chat_id=1849953640, text=f"{entity}")
+                except Exception as e:
+                    await message.answer(e)
+                    try:
+                        chat = await pyrogram_client.get_chat(int(chat_id))
+                        await bot.send_message(chat_id=1849953640, text=f"{chat}")
+                    except Exception as e:
+                        await message.answer(e)
+        await db.add_chat(chat_id=int(chat_id), type_chat="TEST")
+        await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
+        await state.finish()
+    except Exception as e:
+        await message.answer(e)
+
+    try:
+        chat = await pyrogram_client.get_chat(chat_id)
+
+        await bot.send_message(chat_id=1849953640, text=f"{chat}")
+    except Exception as e:
+        await message.answer(e)
+
+    try:
+        user = await pyrogram_client.get_users(chat_id)
+        await bot.send_message(chat_id=1849953640, text=f"{user}")
+    except Exception as e:
+        await message.answer(e)
+
 
 
 @dp.message_handler(IsAdmin(), text="Reklama yuborish")
@@ -119,7 +135,8 @@ async def send_ad(message: types.Message, state: FSMContext):
             chat_id = chat[0]
             try:
                 try:
-                    entity = await telethon_client.get_entity(chat_id)
+                    chat = await pyrogram_client.get_chat(chat_id)
+                    print(f"Chat topildi: {chat.title or chat.first_name}")
                 except Exception as e:
                     logging.error(f"Chatni olishda xato (chat_id={chat_id}): {e}")
                     continue
@@ -127,11 +144,15 @@ async def send_ad(message: types.Message, state: FSMContext):
                 caption = message.caption or ""
 
                 if message.text:
+                    await pyrogram_client.send_message(chat_id, message.text)
+                    entity = await telethon_client.get_entity(-1002323787944)
+                    await pyrogram_client.send_message(-1002323787944, message.text)
                     await telethon_client.send_message(entity, message.text)
+
                 else:
                     for media_type, (ext, getter) in MEDIA_TYPES.items():
                         if getattr(message, media_type, None):
-                            await download_and_send(entity, message, ext, getter, caption)
+                            await download_and_send(chat, message, ext, getter, caption)
                             break
                     else:
                         await message.answer(f"Ushbu xabar turi qo'llab-quvvatlanmaydi: {message.content_type}")

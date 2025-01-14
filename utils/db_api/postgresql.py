@@ -64,3 +64,8 @@ class Database:
     async def select_all_chats(self):
         sql = "SELECT chat_id FROM chats"
         return await self.execute(sql, fetch=True)
+
+    async def select_chat(self, **kwargs):
+        sql = "SELECT * FROM chats WHERE "
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetchrow=True)
