@@ -71,29 +71,13 @@ async def add_chat(message: types.Message, state: FSMContext):
                     await bot.send_message(chat_id=1849953640, text=f"{entity}")
                 except Exception as e:
                     my_logger.error(f"ADD CHAT: GET ENTITY CHANNEL TELETHON:  (chat_id={chat_id}): {e}")
-                    try:
-                        chat = await pyrogram_client.get_chat(int(chat_id))
-                        await bot.send_message(chat_id=1849953640, text=f"{chat}")
-                    except Exception as e:
-                        my_logger.error(f"ADD CHAT: GET CHAT TELETHON:  (chat_id={chat_id}): {e}")
         await db.add_chat(chat_id=int(chat_id), type_chat="TEST")
         await message.answer("Chat muvaffaqiyatli qo'shildi!", reply_markup=main_menu)
         await state.finish()
     except Exception as e:
         await message.answer(e)
 
-    try:
-        chat = await pyrogram_client.get_chat(chat_id)
 
-        await bot.send_message(chat_id=1849953640, text=f"{chat}")
-    except Exception as e:
-        await message.answer(e)
-
-    try:
-        user = await pyrogram_client.get_users(chat_id)
-        await bot.send_message(chat_id=1849953640, text=f"{user}")
-    except Exception as e:
-        await message.answer(e)
 
 
 
@@ -150,10 +134,7 @@ async def send_ad(message: types.Message, state: FSMContext):
                                 entity = await telethon_client.get_entity(peer)
                             except Exception as e:
                                 my_logger.error(f"GET ENTITY CHANNEL TELETHON:  (chat_id={chat_id}): {e}")
-                                try:
-                                    chat = await pyrogram_client.get_chat(int(chat_id))
-                                except Exception as e:
-                                    my_logger.error(f"GET CHAT TELETHON:  (chat_id={chat_id}): {e}")
+
                 except Exception as e:
                     await message.answer(e)
 
