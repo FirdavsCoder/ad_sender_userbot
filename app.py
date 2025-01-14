@@ -2,7 +2,7 @@ import logging
 
 from aiogram import executor
 
-from loader import dp, db, telethon_client, pyrogram_client
+from loader import dp, db, telethon_client
 import middlewares, filters, handlers
 from utils.logger import setup_logger
 from utils.notify_admins import on_startup_notify
@@ -25,10 +25,5 @@ async def on_shutdown(dispatcher):
 
 if __name__ == '__main__':
 
-    # my_logger.debug("Bu debug xabari")
-    # my_logger.info("Bu info xabari")
-    # my_logger.warning("Bu warning xabari")
-    # my_logger.error("Bu error xabari")
-    # my_logger.critical("Bu critical xabari")
     executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)
 

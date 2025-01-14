@@ -7,7 +7,7 @@ from telethon.tl.types import User, Chat, Channel, PeerUser, PeerChannel, PeerCh
 
 from filters.filter import IsAdmin
 from keyboards.default.keyboard import main_menu, cancel_button
-from loader import dp, db, bot, telethon_client, pyrogram_client, my_logger
+from loader import dp, db, bot, telethon_client, my_logger
 from states.states import AddChat, SendAdState
 import logging
 
