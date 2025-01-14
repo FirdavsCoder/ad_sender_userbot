@@ -13,7 +13,6 @@ async def on_startup(dispatcher):
     await db.create()
     # await db.create_table_chats()
     await telethon_client.start()
-    await pyrogram_client.start()
     await set_default_commands(dispatcher)
     await on_startup_notify(dispatcher)
 
